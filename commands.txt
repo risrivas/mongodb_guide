@@ -8,12 +8,16 @@ mongo
 
 # mongo client commands:
 
+# clear screen
+> cls
+
 > show dbs
 admin       0.000GB
 config      0.000GB
 flightmgmt  0.000GB
 local       0.000GB
 
+# youtube demo
 > use mylib
 switched to db mylib
 
@@ -32,4 +36,112 @@ books
 
 > db.books.find()
 { "_id" : ObjectId("60c3d287ccc13c5b49d21253"), "name" : "mongodb book" }
+
+
+# udemy course
+
+> use shop
+switched to db shop
+
+> db.products.insertOne({name: "A Book", price:12.99})
+{
+        "acknowledged" : true,
+        "insertedId" : ObjectId("60c53786d24694398ba828d7")
+}
+
+> db.products.find()
+{ "_id" : ObjectId("60c53786d24694398ba828d7"), "name" : "A Book", "price" : 12.99 }
+
+> db.products.find().pretty()
+{
+        "_id" : ObjectId("60c53786d24694398ba828d7"),
+        "name" : "A Book",
+        "price" : 12.99
+}
+
+> db.products.insertOne({name: "Guitar", price:158.2, description:"an electric guitar"})
+{
+        "acknowledged" : true,
+        "insertedId" : ObjectId("60c5386dd24694398ba828d8")
+}
+
+> db.products.find().pretty()
+{
+        "_id" : ObjectId("60c53786d24694398ba828d7"),
+        "name" : "A Book",
+        "price" : 12.99
+}
+{
+        "_id" : ObjectId("60c5386dd24694398ba828d8"),
+        "name" : "Guitar",
+        "price" : 158.2,
+        "description" : "an electric guitar"
+}
+
+
+> db.products.insertOne({name: "T-Shirt", price:29.0, description:"this is a high quality T-Shirt"})
+{
+        "acknowledged" : true,
+        "insertedId" : ObjectId("60c538f4d24694398ba828d9")
+}
+
+> db.products.find().pretty()
+{
+        "_id" : ObjectId("60c53786d24694398ba828d7"),
+        "name" : "A Book",
+        "price" : 12.99
+}
+{
+        "_id" : ObjectId("60c5386dd24694398ba828d8"),
+        "name" : "Guitar",
+        "price" : 158.2,
+        "description" : "an electric guitar"
+}
+{
+        "_id" : ObjectId("60c538f4d24694398ba828d9"),
+        "name" : "T-Shirt",
+        "price" : 29,
+        "description" : "this is a high quality T-Shirt"
+}
+
+
+> db.products.insertOne({name: "Computer", price:1231.99, description:"this is a high quality computer", details: {cpu: "Intel i7 8770", memory: 32}})
+{
+        "acknowledged" : true,
+        "insertedId" : ObjectId("60c53987d24694398ba828da")
+}
+
+> db.products.find().pretty()
+{
+        "_id" : ObjectId("60c53786d24694398ba828d7"),
+        "name" : "A Book",
+        "price" : 12.99
+}
+{
+        "_id" : ObjectId("60c5386dd24694398ba828d8"),
+        "name" : "Guitar",
+        "price" : 158.2,
+        "description" : "an electric guitar"
+}
+{
+        "_id" : ObjectId("60c538f4d24694398ba828d9"),
+        "name" : "T-Shirt",
+        "price" : 29,
+        "description" : "this is a high quality T-Shirt"
+}
+{
+        "_id" : ObjectId("60c53987d24694398ba828da"),
+        "name" : "Computer",
+        "price" : 1231.99,
+        "description" : "this is a high quality computer",
+        "details" : {
+                "cpu" : "Intel i7 8770",
+                "memory" : 32
+        }
+}
+
+>
+
+
+
 
