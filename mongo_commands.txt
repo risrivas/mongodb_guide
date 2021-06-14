@@ -17,10 +17,17 @@ config      0.000GB
 flightmgmt  0.000GB
 local       0.000GB
 
+#####################
+
 # youtube demo
+# database -> collections -> documents 
+
+# database
 > use mylib
 switched to db mylib
 
+# books - collection
+# json - document
 > db.books.insert({"name":"mongodb book"})
 WriteResult({ "nInserted" : 1 })
 
@@ -37,6 +44,7 @@ books
 > db.books.find()
 { "_id" : ObjectId("60c3d287ccc13c5b49d21253"), "name" : "mongodb book" }
 
+#####################
 
 # udemy course
 
