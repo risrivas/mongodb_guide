@@ -148,7 +148,17 @@ switched to db shop
         }
 }
 
->
+================================
+
+# Basics
+
+- start mongod on different port than default 27017
+mongod --port 27018
+mongo --port 27018
+
+
+
+
 
 
 
