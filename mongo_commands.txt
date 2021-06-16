@@ -150,11 +150,67 @@ switched to db shop
 
 ================================
 
+###################
 # Basics
+###################
 
 - start mongod on different port than default 27017
 mongod --port 27018
 mongo --port 27018
+
+- json always contain keys in double quotes, 
+- however, in mongodb insert commands, we can use keys without quotes 
+- behind the scenes, mongodb uses binary BSON to store
+
+> use flights
+switched to db flights
+
+> db.flightData.insertOne({
+...     "departureAirport": "MUC",
+...     "arrivalAirport": "SFO",
+...     "aircraft": "Airbus A380",
+...     "distance": 12000,
+...     "intercontinental": true
+...   })
+{
+        "acknowledged" : true,
+        "insertedId" : ObjectId("60ca7eb403d6d26b62b1c16c")
+}
+
+> db.flightData.find().pretty()
+{
+        "_id" : ObjectId("60ca7eb403d6d26b62b1c16c"),
+        "departureAirport" : "MUC",
+        "arrivalAirport" : "SFO",
+        "aircraft" : "Airbus A380",
+        "distance" : 12000,
+        "intercontinental" : true
+}
+
+- _id is unique for each document
+- if try to insert 2 documents with same _id, error will be thrown
+
+
+###################
+# CRUD operations
+###################
+
+# Create
+insertOne(data, options)
+insertMany(data, options)
+
+# Read
+find(filter, options)
+findOne(filter, options)
+
+# Update
+updateOne(filter, data, options)
+updateMany(filter, data, options)
+replaceOne(filter, data, options)
+
+# Delete
+deleteOne(filter, options)
+deleteMany(filter, options)
 
 
 
