@@ -213,9 +213,52 @@ deleteOne(filter, options)
 deleteMany(filter, options)
 
 
+=========
 
+> db.flightData.insertOne({"departureAirport": "TXL", "arrivalAirport": "LHR"})
+{
+        "acknowledged" : true,
+        "insertedId" : ObjectId("60cbd46002605fb7c8cf41f7")
+}
 
+> db.flightData.insertOne({"departureAirport": "TXL", "arrivalAirport": "LHR", _id:"txl-lhr-1"})
+{ "acknowledged" : true, "insertedId" : "txl-lhr-1" }
 
+> db.flightData.find().pretty()
+{
+        "_id" : ObjectId("60ca7eb403d6d26b62b1c16c"),
+        "departureAirport" : "MUC",
+        "arrivalAirport" : "SFO",
+        "aircraft" : "Airbus A380",
+        "distance" : 12000,
+        "intercontinental" : true
+}
+{
+        "_id" : ObjectId("60cbd46002605fb7c8cf41f7"),
+        "departureAirport" : "TXL",
+        "arrivalAirport" : "LHR"
+}
+{
+        "_id" : "txl-lhr-1",
+        "departureAirport" : "TXL",
+        "arrivalAirport" : "LHR"
+}
+
+==============
+
+## delete or update the documents
+
+> db.flightData.deleteOne({"departureAirport" : "TXL"})
+{ "acknowledged" : true, "deletedCount" : 1 }
+
+> db.flightData.updateOne({"distance" : 12000}, {$set: {marker: "delete"}})
+{ "acknowledged" : true, "matchedCount" : 1, "modifiedCount" : 1 }
+
+> db.flightData.updateMany({}, {$set: {marker: "toDelete"}})
+{ "acknowledged" : true, "matchedCount" : 2, "modifiedCount" : 2 }
+
+> db.flightData.deleteMany({marker: "toDelete"})
+{ "acknowledged" : true, "deletedCount" : 2 }
 
 
 
