@@ -260,5 +260,79 @@ deleteMany(filter, options)
 > db.flightData.deleteMany({marker: "toDelete"})
 { "acknowledged" : true, "deletedCount" : 2 }
 
+============
+
+# insertMany()
+
+- multiple documents should be as an array - [ {}, {}..... ]
+
+> db.flightData.insertMany([
+...   {
+...     "departureAirport": "MUC",
+...     "arrivalAirport": "SFO",
+...     "aircraft": "Airbus A380",
+...     "distance": 12000,
+...     "intercontinental": true
+...   },
+...   {
+...     "departureAirport": "LHR",
+...     "arrivalAirport": "TXL",
+...     "aircraft": "Airbus A320",
+...     "distance": 950,
+...     "intercontinental": false
+...   }
+... ])
+{
+        "acknowledged" : true,
+        "insertedIds" : [
+                ObjectId("60ce7a27be69cbf3e681005f"),
+                ObjectId("60ce7a27be69cbf3e6810060")
+        ]
+}
+
+===============
+
+# find()
+
+- find can be used without any filter as argument or with it
+
+> db.flightData.find()
+> db.flightData.find().pretty()
+> db.flightData.find().pretty()
+> db.flightData.find({intercontinental: true}).pretty()
+{
+        "_id" : ObjectId("60ce7a27be69cbf3e681005f"),
+        "departureAirport" : "MUC",
+        "arrivalAirport" : "SFO",
+        "aircraft" : "Airbus A380",
+        "distance" : 12000,
+        "intercontinental" : true
+}
+
+- number greater than condition
+> db.flightData.find({distance: {$gt: 1000}}).pretty()
+{
+        "_id" : ObjectId("60ce7a27be69cbf3e681005f"),
+        "departureAirport" : "MUC",
+        "arrivalAirport" : "SFO",
+        "aircraft" : "Airbus A380",
+        "distance" : 12000,
+        "intercontinental" : true
+}
+
+- pretty() is not supported for findOne() because output is already pretty
+> db.flightData.findOne({distance: {$gt: 900}})
+{
+        "_id" : ObjectId("60ce7a27be69cbf3e681005f"),
+        "departureAirport" : "MUC",
+        "arrivalAirport" : "SFO",
+        "aircraft" : "Airbus A380",
+        "distance" : 12000,
+        "intercontinental" : true
+}
+
+==============
+
+
 
 
