@@ -333,6 +333,85 @@ deleteMany(filter, options)
 
 ==============
 
+# update() and updateMany()
+
+update() works similar to updateOne() and updateMany()
+- however, if $set is not used, then one and many will give error
+- but update will replace the whole document with only the updated document provided
+
+example:
+
+> db.flightData.find().pretty()
+{
+        "_id" : ObjectId("60ce7a27be69cbf3e681005f"),
+        "departureAirport" : "MUC",
+        "arrivalAirport" : "SFO",
+        "aircraft" : "Airbus A380",
+        "distance" : 12000,
+        "intercontinental" : true,
+        "delayed" : false
+}
+{
+        "_id" : ObjectId("60ce7a27be69cbf3e6810060"),
+        "departureAirport" : "LHR",
+        "arrivalAirport" : "TXL",
+        "aircraft" : "Airbus A320",
+        "distance" : 950,
+        "intercontinental" : false
+}
+
+> db.flightData.updateOne({_id:  ObjectId("60ce7a27be69cbf3e681005f")}, {delayed: false})
+uncaught exception: Error: the update operation document must contain atomic operators :
+DBCollection.prototype.updateOne@src/mongo/shell/crud_api.js:565:19
+@(shell):1:1
+
+> db.flightData.updateMany({_id:  ObjectId("60ce7a27be69cbf3e681005f")}, {delayed: false})
+uncaught exception: Error: the update operation document must contain atomic operators :
+DBCollection.prototype.updateMany@src/mongo/shell/crud_api.js:655:19
+@(shell):1:1
+
+> db.flightData.update({_id:  ObjectId("60ce7a27be69cbf3e681005f")}, {delayed: false})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+
+> db.flightData.find().pretty()
+{ "_id" : ObjectId("60ce7a27be69cbf3e681005f"), "delayed" : false }
+{
+        "_id" : ObjectId("60ce7a27be69cbf3e6810060"),
+        "departureAirport" : "LHR",
+        "arrivalAirport" : "TXL",
+        "aircraft" : "Airbus A320",
+        "distance" : 950,
+        "intercontinental" : false
+}
+
+- better not to use update() and use replaceOne() for replacing the whole document
+- for partial changes, use updateOne or updateMany
+
+> db.flightData.replaceOne({_id:  ObjectId("60ce7a27be69cbf3e681005f")}, {
+...     "departureAirport": "MUC",
+...     "arrivalAirport": "SFO",
+...     "aircraft": "Airbus A380",
+...     "distance": 12000,
+...     "intercontinental": true
+...   })
+{ "acknowledged" : true, "matchedCount" : 1, "modifiedCount" : 1 }
+> db.flightData.find().pretty()
+{
+        "_id" : ObjectId("60ce7a27be69cbf3e681005f"),
+        "departureAirport" : "MUC",
+        "arrivalAirport" : "SFO",
+        "aircraft" : "Airbus A380",
+        "distance" : 12000,
+        "intercontinental" : true
+}
+{
+        "_id" : ObjectId("60ce7a27be69cbf3e6810060"),
+        "departureAirport" : "LHR",
+        "arrivalAirport" : "TXL",
+        "aircraft" : "Airbus A320",
+        "distance" : 950,
+        "intercontinental" : false
+}
 
 
 
