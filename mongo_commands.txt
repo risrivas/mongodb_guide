@@ -414,4 +414,30 @@ WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
 }
 
 
+#############################
+# find() and the cursor object
+#############################
+
+- find() doesn't return all the data in the collection because data can be huge
+- instead it returns a cursor object, can use "it" to fetch more data in cycles
+
+- to get all the data at once, use toArray()
+> db.passengers.find().toArray()
+
+- can use forEach() for each document operation, its better for performance
+> db.passengers.find().forEach((passengerData) => {printjson(passengerData)})
+
+- pretty() is only available on cursor object got from find(), thus fails for findOne() which does not returns cursor
+> db.passengers.findOne().pretty()
+uncaught exception: TypeError: db.passengers.findOne(...).pretty is not a function :
+@(shell):1:1
+
+
+
+
+
+
+
+
+
 
