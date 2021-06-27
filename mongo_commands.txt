@@ -433,6 +433,19 @@ uncaught exception: TypeError: db.passengers.findOne(...).pretty is not a functi
 @(shell):1:1
 
 
+#############
+# projection
+#############
+
+- when we only want a subset of document to be returned from find()
+- example:
+> db.passengers.find({},{name:1}).pretty()
+
+- _id is always included
+- to exlude _id explicitly
+> db.passengers.find({},{name:1, _id:0}).pretty()
+ 
+- filtering is done at mongod server side, so network bandwidth is saved
 
 
 
