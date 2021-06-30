@@ -20,7 +20,7 @@ local       0.000GB
 #####################
 
 # youtube demo
-# database -> collections -> documents 
+# database -> collections -> documents
 
 # database
 > use mylib
@@ -158,8 +158,8 @@ switched to db shop
 mongod --port 27018
 mongo --port 27018
 
-- json always contain keys in double quotes, 
-- however, in mongodb insert commands, we can use keys without quotes 
+- json always contain keys in double quotes,
+- however, in mongodb insert commands, we can use keys without quotes
 - behind the scenes, mongodb uses binary BSON to store
 
 > use flights
@@ -444,11 +444,110 @@ uncaught exception: TypeError: db.passengers.findOne(...).pretty is not a functi
 - _id is always included
 - to exlude _id explicitly
 > db.passengers.find({},{name:1, _id:0}).pretty()
- 
+
 - filtering is done at mongod server side, so network bandwidth is saved
 
+#############
+# embedded documents
+# arrays
+#############
 
+- value can have many nested documents
+- upto 100 level of nesting - hard limit
+- max 16MB per document
 
+ex:
+> db.flightData.updateMany({}, {$set: {status: {description: "on-time", lastUpdated: "1 hour ago", details: {responsible: "Rishi Srivastava"}}}})
+{ "acknowledged" : true, "matchedCount" : 2, "modifiedCount" : 2 }
+
+> db.flightData.find().pretty()
+{
+        "_id" : ObjectId("60ce7a27be69cbf3e681005f"),
+        "departureAirport" : "MUC",
+        "arrivalAirport" : "SFO",
+        "aircraft" : "Airbus A380",
+        "distance" : 12000,
+        "intercontinental" : true,
+        "status" : {
+                "description" : "on-time",
+                "lastUpdated" : "1 hour ago",
+                "details" : {
+                        "responsible" : "Rishi Srivastava"
+                }
+        }
+}
+{
+        "_id" : ObjectId("60ce7a27be69cbf3e6810060"),
+        "departureAirport" : "LHR",
+        "arrivalAirport" : "TXL",
+        "aircraft" : "Airbus A320",
+        "distance" : 950,
+        "intercontinental" : false,
+        "status" : {
+                "description" : "on-time",
+                "lastUpdated" : "1 hour ago",
+                "details" : {
+                        "responsible" : "Rishi Srivastava"
+                }
+        }
+}
+
+---------------
+# arrays
+- array of embedded documents - between [ ]
+- arrays can hold ANY data
+
+ex:
+> db.passengers.updateOne({name: "Albert Twostone"}, {$set: {hobbies: ["sports", "cooking"]}})
+{ "acknowledged" : true, "matchedCount" : 1, "modifiedCount" : 1 }
+
+> db.passengers.find({name: "Albert Twostone"}).pretty()
+{
+        "_id" : ObjectId("60d501ed8a734511d0f8661b"),
+        "name" : "Albert Twostone",
+        "age" : 68,
+        "hobbies" : [
+                "sports",
+                "cooking"
+        ]
+}
+
+- accessing structured data using . operator
+> db.passengers.findOne({name: "Albert Twostone"}).hobbies
+[ "sports", "cooking" ]
+
+- or, by using search pattern:
+> db.passengers.find({hobbies: "sports"}).pretty()
+{
+        "_id" : ObjectId("60d501ed8a734511d0f8661b"),
+        "name" : "Albert Twostone",
+        "age" : 68,
+        "hobbies" : [
+                "sports",
+                "cooking"
+        ]
+}
+
+- to find all the documents for a particular key in a nested document, use . operator
+ex:
+{
+        "_id" : ObjectId("60ce7a27be69cbf3e6810060"),
+        "departureAirport" : "LHR",
+        "arrivalAirport" : "TXL",
+        "aircraft" : "Airbus A320",
+        "distance" : 950,
+        "intercontinental" : false,
+        "status" : {
+                "description" : "on-time",
+                "lastUpdated" : "1 hour ago",
+                "details" : {
+                        "responsible" : "Rishi Srivastava"
+                }
+        }
+}
+
+- if want to find "description" : "on-time", then use . operator; remember to use key inside ""
+> db.flightData.find({"status.description": "on-time"}).pretty()
 
 
 
