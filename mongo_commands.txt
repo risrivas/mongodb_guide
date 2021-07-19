@@ -395,6 +395,7 @@ WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
 ...     "intercontinental": true
 ...   })
 { "acknowledged" : true, "matchedCount" : 1, "modifiedCount" : 1 }
+
 > db.flightData.find().pretty()
 {
         "_id" : ObjectId("60ce7a27be69cbf3e681005f"),
@@ -550,6 +551,44 @@ ex:
 > db.flightData.find({"status.description": "on-time"}).pretty()
 
 
+#############
+# Assignment
+#############
 
+{
+  firstName
+  lastName
+  age
+  history
+    [
+           { disease,  treatment }
+           {  }
+        ]
+}
+
+- insert 3 patient records
+- update patient data of 1 with new age, name and history
+- find all patients older than 30
+- delete all patients who got a cold
+
+# solution
+1) insert 3 patient records
+use patients
+db.patient.insertOne({firstName: "John", lastName: "Wright", age: 43, history: [{disease: "cold", treatment: "medicines"}, {disease: "headache", treatment: "coconut"}]})
+db.patient.insertOne({firstName: "Kenneth", lastName: "Chin", age: 25, history: [{disease: "insomnia", treatment: "sleep"}]})
+db.patient.insertOne({firstName: "Suphathorn", lastName: "Ramabutr", age: 41, history: [{disease: "workaholic", treatment: "holidays"}, {disease: "cold", treatment: "panadol"}]})
+
+# could use insertMany()
+
+db.patient.find().pretty()
+
+2) update patient data of 1 with new age, name and history
+db.patient.updateOne({firstName: "Kenneth"}, {$set: {firstName: "Garfield", lastName: "Lau", age: 29, history: [{disease: "diabetes", treatment: "insulin"}]}})
+
+3) find all patients older than 30
+db.patient.find({age: {$gt: 30}}).pretty()
+
+4) delete all patients who got a cold
+db.patient.deleteMany({"history.disease": "cold"})
 
 
