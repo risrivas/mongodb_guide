@@ -46,7 +46,7 @@ books
 
 #####################
 
-# udemy course
+## Course
 
 > use shop
 switched to db shop
@@ -590,5 +590,17 @@ db.patient.find({age: {$gt: 30}}).pretty()
 
 4) delete all patients who got a cold
 db.patient.deleteMany({"history.disease": "cold"})
+
+
+#############################
+# Schemas & Relations
+# How to Structure Documents
+#############################
+- Drop a database
+use <databaseName>
+db.dropDatabase()
+
+- Drop a collection
+db.<collectionName>.drop()
 
 
