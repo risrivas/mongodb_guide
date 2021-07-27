@@ -17,6 +17,10 @@ config      0.000GB
 flightmgmt  0.000GB
 local       0.000GB
 
+# use quit() to close mongo cmd prompt
+> quit()
+
+
 #####################
 
 # youtube demo
@@ -264,7 +268,7 @@ deleteMany(filter, options)
 
 # insertMany()
 
-- multiple documents should be as an array - [ {}, {}..... ]
+- multiple documents MUST be inserted as an array - [ {}, {}..... ]
 
 > db.flightData.insertMany([
 ...   {
@@ -551,6 +555,14 @@ ex:
 > db.flightData.find({"status.description": "on-time"}).pretty()
 
 
+- Drop a database
+use <databaseName>
+db.dropDatabase()
+
+- Drop a collection
+db.<collectionName>.drop()
+
+
 #############
 # Assignment
 #############
@@ -596,11 +608,8 @@ db.patient.deleteMany({"history.disease": "cold"})
 # Schemas & Relations
 # How to Structure Documents
 #############################
-- Drop a database
-use <databaseName>
-db.dropDatabase()
-
-- Drop a collection
-db.<collectionName>.drop()
+- Schema means defining the table structure and type / name of columns it can hold
+- MongoDB enforces no schemas => documents dont have to use the same schema inside of one collection
+- better design is to have some fields which are always present in all the documents + some extra keys for few documents
 
 
