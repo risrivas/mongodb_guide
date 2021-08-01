@@ -613,3 +613,21 @@ db.patient.deleteMany({"history.disease": "cold"})
 - better design is to have some fields which are always present in all the documents + some extra keys for few documents
 
 
+#############
+# Data Types
+#############
+- Text - always inside "" - max 16 MB
+- Boolean - true / false
+- Number - Integer (int32), NumberLong (int64), NumberDecimal
+by default its decimal number as JavaScript has default Number
+- ObjectId - unique _id
+- ISODate - "yyyy-mm-dd"
+- Timestamp
+- Embedded Document - {"a": { ... }}
+- Array - {"b": [ ... ]}
+
+
+
+
+
+
