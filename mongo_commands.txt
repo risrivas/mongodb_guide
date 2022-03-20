@@ -1,3 +1,52 @@
+###############
+# Introduction
+###############
+- nosql database - meaning data can be inserted with no schema or relations (joins)
+- concept of server (mongod) and client (mongo)
+- can have many databases -> each database can have many collections (tables) -> each collections can have many documents (records/rows)
+- documents can have any fields in a collection
+
+
+#####################
+# Installing MongoDB
+#####################
+
+## Windows
+- for Community server: use msi and then click Download
+https://www.mongodb.com/try/download/community
+
+- install MongoD as a Service
+search Services from windows search -> then make the MongoDB Server to run automatically when Windows starts
+
+- Service name = MongoDB
+- alternatively, to stop from command prompt
+launch cmd as admin -> run command = "net stop MongoDB"
+start command = "net start MongoDB"
+
+- data and log directory:
+C:\Program Files\MongoDB\Server\4.4\data
+C:\Program Files\MongoDB\Server\4.4\log
+
+- mongo client is present in (double clicking it will launch the client)
+C:\Program Files\MongoDB\Server\4.4\bin\mongo.exe
+
+- if bin is added to the PATH, then can run commands from cmd directly to start / stop server and client
+
+
+## Install MongoDB shell
+- alternative to legacy mongo client (installed by default), we can also install new shell
+https://www.mongodb.com/try/download/shell
+
+- install at
+C:\Users\rishi\AppData\Local\Programs\mongosh\
+
+- copy the 2 files to mongo bin directory as its already in PATH
+mongosh.exe
+mongocryptd-mongosh.exe
+
+
+## basic commands
+
 # run mongo database from cmd
 mongod
 
@@ -17,8 +66,35 @@ config      0.000GB
 flightmgmt  0.000GB
 local       0.000GB
 
+# to create a new database and use it at same time, just run command: "use <database-name>"
+> use shop
+switched to db shop
+
+# similarly to create a new collection (say, "products") and use it (insert records):
+> db.products.insertOne({name: "Guitar", price: 100.99})
+
 # use quit() to close mongo cmd prompt
 > quit()
+
+
+## Install mongoimport
+- used to import some prepared data into a MongoDB database
+https://docs.mongodb.com/database-tools/installation/installation/
+https://docs.mongodb.com/database-tools/installation/installation-windows/
+
+- other tools are also added and add bin to PATH
+C:\Program Files\MongoDB\Tools\100\bin\
+
+
+## use drivers
+- use Java client to interact with mongod server
+https://docs.mongodb.com/drivers/java-drivers/
+
+
+## whole diagram                                                  Queries
+frontend UI -> Backend (server) -> Drivers (Java/Python/Node.js)  =======  MongoDB Server <-> Storage Engine <-> DB (slow) or memory (fast)
+                                      or
+                                   MongoDB Shell
 
 
 #####################
@@ -561,6 +637,9 @@ db.dropDatabase()
 
 - Drop a collection
 db.<collectionName>.drop()
+
+- delete all data from a collection
+db.<collectionName>.deleteMany({})
 
 
 #############
