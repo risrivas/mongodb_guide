@@ -737,8 +737,162 @@ number
 > typeof db.numbers.findOne().b
 undefined
 
+- if need double precision - just like BigDecimal("123.456") in Java, use NumberDecimal("12.99")
+companyData> db.numbers.insertOne({c: NumberDecimal("12.99")})
+
+companyData> typeof db.numbers.findOne().c
+undefined
 
 
+## Data Schemas & Data Modelling
+1) Which Data does my App need or generate ?
+User, Product, Orders, etc.
+
+- Defines the fields we will need (and how they relate)
+
+2) Where do I need my data ?
+UI, products list page, orders page, etc.
+
+- Defines the required collections + field groupings
+
+3) Which kind of data or information do I want to display?
+UI, products list page, orders page, etc.
+
+- Defines which queries we will need
+
+4) How often do I fetch my data?
+ex: For every page reload
+
+- Defines whether you should optimize for easy fetching
+
+5) How often do I write or change my data?
+Orders => often; Product Data => rarely
+
+- Defines whether you should optimize for easy writing
+
+
+## Understanding Relations
+- want to put all the embedded documents in 1 collection or split into mulitple collections
+ex: user collection and has different embedded documents like favorite books, hobbies, etc
+option 1 is to put all in user collection
+option 2 is to have separate collections for books, hobbies etc and use unique id to join them
+
+
+##################################
+# One to one relation - embedded
+##################################
+
+## Example 1 - Patient <-> Disease summary
+
+# first using option 2 (join)
+- mongo shell:
+------------------------------------
+companyData> use hospital
+switched to db hospital
+
+hospital> db.patients.insertOne({name: "Max", age: 29, diseaseSummary: "summary-max-1"})
+{
+  acknowledged: true,
+  insertedId: ObjectId("623fa424bd001f554cfea95e")
+}
+
+hospital> db.patients.find()
+[
+  {
+    _id: ObjectId("623fa424bd001f554cfea95e"),
+    name: 'Max',
+    age: 29,
+    diseaseSummary: 'summary-max-1'
+  }
+]
+
+hospital> db.diseaseSummaries.insertOne({_id: "summary-max-1", diseases: ["cold", "broken leg"]})
+{ acknowledged: true, insertedId: 'summary-max-1' }
+
+hospital> db.diseaseSummaries.find()
+[ { _id: 'summary-max-1', diseases: [ 'cold', 'broken leg' ] } ]
+
+hospital> var dsid = db.patients.findOne().diseaseSummary
+
+hospital> dsid
+summary-max-1
+
+hospital> db.diseaseSummaries.findOne({_id: dsid})
+{ _id: 'summary-max-1', diseases: [ 'cold', 'broken leg' ] }
+------------------------------------
+
+- however, performance wise it's not good
+
+# so better use option 1 - put it as embedded document
+- mongo shell:
+------------------------------------
+hospital> db.patients.deleteMany({})
+{ acknowledged: true, deletedCount: 1 }
+
+hospital> db.patients.insertOne({name: "Max", age: 29, diseaseSummary: {diseases: ["cold", "broken leg"]}})
+{
+  acknowledged: true,
+  insertedId: ObjectId("623fa6d4bd001f554cfea95f")
+}
+
+hospital> db.patients.find()
+[
+  {
+    _id: ObjectId("623fa6d4bd001f554cfea95f"),
+    name: 'Max',
+    age: 29,
+    diseaseSummary: { diseases: [ 'cold', 'broken leg' ] }
+  }
+]
+------------------------------------
+
+
+## Example 2 - Person <-> Car
+
+- sometimes option 2 is useful based on use case
+- mongo shell:
+------------------------------------
+hospital> use carData
+switched to db carData
+
+carData> db.persons.insertOne({name: "Max", car: {model: "BMW", price: 40000}})
+{
+  acknowledged: true,
+  insertedId: ObjectId("623fa9d0bd001f554cfea960")
+}
+
+carData> db.persons.find()
+[
+  {
+    _id: ObjectId("623fa9d0bd001f554cfea960"),
+    name: 'Max',
+    car: { model: 'BMW', price: 40000 }
+  }
+]
+
+# better use option 2
+
+carData> db.persons.deleteMany({})
+{ acknowledged: true, deletedCount: 1 }
+
+carData> db.persons.insertOne({name: "Max", age:29, salary:3000})
+{
+  acknowledged: true,
+  insertedId: ObjectId("623faad7bd001f554cfea961")
+}
+
+carData> db.cars.insertOne({model: "BMW", price: 40000, owner: ObjectId("623faad7bd001f554cfea961")})
+{
+  acknowledged: true,
+  insertedId: ObjectId("623fab1ebd001f554cfea962")
+}
+
+------------------------------------
+
+
+##################################
+# One to many relation - embedded
+##################################
 
 
 
