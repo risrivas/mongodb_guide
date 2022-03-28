@@ -784,7 +784,8 @@ option 2 is to have separate collections for books, hobbies etc and use unique i
 
 ## Example 1 - Patient <-> Disease summary
 
-# first using option 2 (join)
+# first using option 2 (join / use reference key)
+
 - mongo shell:
 ------------------------------------
 companyData> use hospital
@@ -824,6 +825,7 @@ hospital> db.diseaseSummaries.findOne({_id: dsid})
 - however, performance wise it's not good
 
 # so better use option 1 - put it as embedded document
+
 - mongo shell:
 ------------------------------------
 hospital> db.patients.deleteMany({})
@@ -849,7 +851,7 @@ hospital> db.patients.find()
 
 ## Example 2 - Person <-> Car
 
-- sometimes option 2 is useful based on use case
+- sometimes option 2 (use reference key) is useful based on use case
 - mongo shell:
 ------------------------------------
 hospital> use carData
@@ -894,7 +896,111 @@ carData> db.cars.insertOne({model: "BMW", price: 40000, owner: ObjectId("623faad
 # One to many relation - embedded
 ##################################
 
+## Example 3 - Thread <-> Answers
+- one thread has many answers, one answer belongs to one question thread
 
+- mongo shell
+------------------------------------
+test> use support
+switched to db support
+
+support> db.questionThreads.insertOne({creator: "Max", question: "How does that all work?", answers: ["q1a1", "q1a2"]})
+{
+  acknowledged: true,
+  insertedId: ObjectId("6240f9d2b23bd2d6489848ed")
+}
+
+support> db.questionThreads.find()
+[
+  {
+    _id: ObjectId("6240f9d2b23bd2d6489848ed"),
+    creator: 'Max',
+    question: 'How does that all work?',
+    answers: [ 'q1a1', 'q1a2' ]
+  }
+]
+
+support> db.answers.insertMany([{_id: "q1a1", text: "It works like that."}, {_id: "q1a2", text: "Thanks!"}])
+{ acknowledged: true, insertedIds: { '0': 'q1a1', '1': 'q1a2' } }
+
+support> db.answers.find()
+[
+  { _id: 'q1a1', text: 'It works like that.' },
+  { _id: 'q1a2', text: 'Thanks!' }
+]
+
+
+# however better design will be to use embedded document rather than reference/join
+
+support> db.questionThreads.deleteMany({})
+{ acknowledged: true, deletedCount: 1 }
+
+support> db.questionThreads.insertOne({creator: "Max", question: "How does that work?", answers: [{text: "Like that."}, {text: "Thanks!"}]})
+{
+  acknowledged: true,
+  insertedId: ObjectId("6240fbc4b23bd2d6489848ee")
+}
+
+support> db.questionThreads.find()
+[
+  {
+    _id: ObjectId("6240fbc4b23bd2d6489848ee"),
+    creator: 'Max',
+    question: 'How does that work?',
+    answers: [ { text: 'Like that.' }, { text: 'Thanks!' } ]
+  }
+]
+
+------------------------------------
+
+
+## Example 4 - City <-> Citizens
+- one city has many citizens, one citizen belongs to one city
+- use references instead of embedded documents because there can be millions of citizens and thus can hit the limit of 16MB per document
+
+- mongo shell:
+------------------------------------
+support> use cityData
+switched to db cityData
+
+cityData> db.cities.insertOne({name: "New York City", coordinates: {lat: 21, lng: 55}})
+{
+  acknowledged: true,
+  insertedId: ObjectId("6240fee7b23bd2d6489848ef")
+}
+
+cityData> db.citizens.insertMany([{name: "Max Schwarzmueller", cityId: ObjectId("6240fee7b23bd2d6489848ef")}, {name: "Manuel Lorenz", cityId: ObjectId("6240fee7b23bd2d6489848ef")}])
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId("62410540b23bd2d6489848f0"),
+    '1': ObjectId("62410540b23bd2d6489848f1")
+  }
+}
+
+cityData> db.citizens.find()
+[
+  {
+    _id: ObjectId("62410540b23bd2d6489848f0"),
+    name: 'Max Schwarzmueller',
+    cityId: ObjectId("6240fee7b23bd2d6489848ef")
+  },
+  {
+    _id: ObjectId("62410540b23bd2d6489848f1"),
+    name: 'Manuel Lorenz',
+    cityId: ObjectId("6240fee7b23bd2d6489848ef")
+  }
+]
+
+------------------------------------
+
+
+
+##################################
+# Many to Many relation - embedded
+##################################
+
+## Example 5 - Customers <-> Products (Orders)
 
 
 
