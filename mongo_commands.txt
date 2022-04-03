@@ -1001,7 +1001,134 @@ cityData> db.citizens.find()
 ##################################
 
 ## Example 5 - Customers <-> Products (Orders)
+- Many customers can have many products
+
+- mongo shell:
+------------------------------------
+shop> db.products.find().pretty()
+[
+  {
+    _id: ObjectId("60c53786d24694398ba828d7"),
+    name: 'A Book',
+    price: 12.99
+  },
+  {
+    _id: ObjectId("60c5386dd24694398ba828d8"),
+    name: 'Guitar',
+    price: 158.2,
+    description: 'an electric guitar'
+  }
+]
+
+shop> db.customers.insertOne({name: "Max", age: 29})
+{
+  acknowledged: true,
+  insertedId: ObjectId("6248dffacb06b38b4f96d1df")
+}
+
+shop> db.orders.insertOne({productId: ObjectId("60c53786d24694398ba828d7"), customcustomerId: ObjectId("6248dffacb06b38b4f96d1df")})
+{
+  acknowledged: true,
+  insertedId: ObjectId("6248e064cb06b38b4f96d1e0")
+}
+
+# or, we can delete orders collection and use embedded
+- customers will have embedded orders
+
+shop> db.customers.updateOne({}, {$set: {orders: [{productId: ObjectId("60c53786d24694398ba828d7"), quantity: 2}]}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+
+shop> db.customers.find()
+[
+  {
+    _id: ObjectId("6248dffacb06b38b4f96d1df"),
+    name: 'Max',
+    age: 29,
+    orders: [
+      { productId: ObjectId("60c53786d24694398ba828d7"), quantity: 2 }
+    ]
+  }
+]
 
 
+
+############################################
+# Many to Many relation - using references
+############################################
+
+## Example 6 - Books <-> Authors
+- One book has many authors, an author belongs to many books
+
+- mongo shell:
+------------------------------------
+test> use bookRegistry
+
+bookRegistry> db.books.insertOne({name: "My fav book", authors: [{name: "Max", age: 29}, {name: "John", age: 30}]})
+{
+  acknowledged: true,
+  insertedId: ObjectId("6248e725cb06b38b4f96d1e1")
+}
+
+bookRegistry> db.books.find().pretty()
+[
+  {
+    _id: ObjectId("6248e725cb06b38b4f96d1e1"),
+    name: 'My fav book',
+    authors: [ { name: 'Max', age: 29 }, { name: 'John', age: 30 } ]
+  }
+]
+
+bookRegistry> db.authors.insertMany([{name: "Max", age: 29, address: {street: "Main"}}, {name: "John", age: 30, address: {street: "Tree"}}])
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId("6248e86bcb06b38b4f96d1e2"),
+    '1': ObjectId("6248e86bcb06b38b4f96d1e3")
+  }
+}
+
+# better to use references as author age will change or other details like address
+
+bookRegistry> db.books.updateOne({}, {$set: {authors: [ObjectId("6248e86bcb06b38b4f96d1e2"), ObjectId("6248e86bcb06b38b4f96d1e3")]}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+
+bookRegistry> db.books.find()
+[
+  {
+    _id: ObjectId("6248e725cb06b38b4f96d1e1"),
+    name: 'My fav book',
+    authors: [
+      ObjectId("6248e86bcb06b38b4f96d1e2"),
+      ObjectId("6248e86bcb06b38b4f96d1e3")
+    ]
+  }
+]
+
+
+######################
+# Summary - relations
+######################
+
+# use embedded:
+- group data together logically
+- great for data that belong together without any duplicates
+- avoid super deep nesting (100+ levels) or document size limit of 16 MB
+
+# use references:
+- split data across collections
+- great for related but shared data with duplicates
+- no issue of deep nesting or size limits
 
 
