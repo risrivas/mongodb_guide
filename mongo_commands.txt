@@ -1125,10 +1125,161 @@ bookRegistry> db.books.find()
 - group data together logically
 - great for data that belong together without any duplicates
 - avoid super deep nesting (100+ levels) or document size limit of 16 MB
+- dont use for example in case if a User is there -> if the User details change, then need to change all the documents
 
 # use references:
 - split data across collections
 - great for related but shared data with duplicates
 - no issue of deep nesting or size limits
+
+
+##############################
+# Use lookup() for references
+##############################
+- we can use lookup method to get documents from other referenced collections
+
+- mongo shell:
+------------------------------------
+bookRegistry> db.books.find()
+[
+  {
+    _id: ObjectId("6248e725cb06b38b4f96d1e1"),
+    name: 'My fav book',
+    authors: [
+      ObjectId("6248e86bcb06b38b4f96d1e2"),
+      ObjectId("6248e86bcb06b38b4f96d1e3")
+    ]
+  }
+]
+
+bookRegistry> db.authors.find()
+[
+  {
+    _id: ObjectId("6248e86bcb06b38b4f96d1e2"),
+    name: 'Max',
+    age: 29,
+    address: { street: 'Main' }
+  },
+  {
+    _id: ObjectId("6248e86bcb06b38b4f96d1e3"),
+    name: 'John',
+    age: 30,
+    address: { street: 'Tree' }
+  }
+]
+
+bookRegistry> db.books.aggregate([{$lookup: {from: "authors", localField: "authors", foreignField: "_id", as: "creators"}}]).pretty()
+[
+  {
+    _id: ObjectId("6248e725cb06b38b4f96d1e1"),
+    name: 'My fav book',
+    authors: [
+      ObjectId("6248e86bcb06b38b4f96d1e2"),
+      ObjectId("6248e86bcb06b38b4f96d1e3")
+    ],
+    creators: [
+      {
+        _id: ObjectId("6248e86bcb06b38b4f96d1e2"),
+        name: 'Max',
+        age: 29,
+        address: { street: 'Main' }
+      },
+      {
+        _id: ObjectId("6248e86bcb06b38b4f96d1e3"),
+        name: 'John',
+        age: 30,
+        address: { street: 'Tree' }
+      }
+    ]
+  }
+]
+
+
+##########################
+# Exercise project - Blog
+##########################
+- database: blog
+- collections: User, Post
+- Post has got embedded Comments and reference for User
+
+- mongo shell:
+------------------------------------
+bookRegistry> use blog
+switched to db blog
+
+blog> db.users.insertMany([{name: "Max Schwarz", age: 29, email: "max@test.com"}, {name: "Manuel Lorenz", age: 30, email: "manu@test.com"}])
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId("624a3258a0270b69c8e755ae"),
+    '1': ObjectId("624a3258a0270b69c8e755af")
+  }
+}
+
+blog> db.users.find()
+[
+  {
+    _id: ObjectId("624a3258a0270b69c8e755ae"),
+    name: 'Max Schwarz',
+    age: 29,
+    email: 'max@test.com'
+  },
+  {
+    _id: ObjectId("624a3258a0270b69c8e755af"),
+    name: 'Manuel Lorenz',
+    age: 30,
+    email: 'manu@test.com'
+  }
+]
+
+
+blog> db.posts.insertOne({title: "My first Post!", text: "This is my first post, I hope you like it!", tags: ["new", "tech"], creator: ObjectId("624a3258a0270b69c8e755af"), comments: [{text: "I like this post!", author: ObjectId("624a3258a0270b69c8e755ae")}]})
+{
+  acknowledged: true,
+  insertedId: ObjectId("624a3447a0270b69c8e755b0")
+}
+
+blog> db.posts.find()
+[
+  {
+    _id: ObjectId("624a3447a0270b69c8e755b0"),
+    title: 'My first Post!',
+    text: 'This is my first post, I hope you like it!',
+    tags: [ 'new', 'tech' ],
+    creator: ObjectId("624a3258a0270b69c8e755af"),
+    comments: [
+      {
+        text: 'I like this post!',
+        author: ObjectId("624a3258a0270b69c8e755ae")
+      }
+    ]
+  }
+]
+
+
+#####################
+# Schema Validation
+#####################
+- schema can be validated in MongoDB - means insertOne() command can fail if validation fails
+
+# validationLevel
+- Which documents get validated?
+strict -> all inserts & updates
+moderate - all inserts & updates to correct documents
+
+# validationAction
+- What happens if validation fails?
+error -> throw error and deny insert/update
+warn -> log warning but proceed
+
+
+blog> db.createCollection('posts', { validator: { $jsonSchema: { bsonType: 'object', required: ['title', 'text', 'creator', 'comments'], properties: { title: { bsonType: "string", description: "must be a string and is required" }, text: { bsonType: "string", description: "must be a string and is required" }, creator: { bsonType: "objectId", description: "must be a objectId and is required" }, comments: { bsonType: "array", description: "must be an array and is required", items: { bsonType: "object", required: ["text", "author"], properties: { text: { bsonType: "string", description: "must be a string and is required" }, author: { bsonType: 'objectId', description: "must be a objectId and is required" } } } } } } } });
+{ ok: 1 }
+
+blog> db.posts.insertOne({title: "My first Post!", text: "This is my first post, I hope you like it!", tags: ["new", "tech"], creator: ObjectId("624a3258a0270b69c8e755af"), comments: [{text: "I like this post!", author: 123}]})
+MongoServerError: Document failed validation
+
+
+
 
 
