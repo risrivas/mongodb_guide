@@ -1280,6 +1280,75 @@ blog> db.posts.insertOne({title: "My first Post!", text: "This is my first post,
 MongoServerError: Document failed validation
 
 
+# validation can be changed from error to warn
+- attached validation-2.js can be used to change the action to warning message in logs
+
+
+#################
+# Schema wrap up
+#################
+- in which format will you fetch your data ?
+- how often will you fetch and change your data ?
+- how much data will you save (and how big is it) ?
+- how is your data related ?
+- will duplicates hurt you (=> many updates) ?
+- will you hit data/storage limits ?
+
+- 2 options: embedded or references
+- embedded suited more for one-to-one or one-to-many relations
+- references suited more for many-to-many relations
+
+
+----------------------------
+
+
+#################################
+# Working with Shell and Server
+#################################
+- start mongodb server as process & service
+- configuring database & log path (and mode)
+- fixing issues
+
+
+- start from cmd
+mongod
+mongo
+
+- get all the options
+mongod --help
+
+# set "dbpath" & "logpath"
+- default data and log directory:
+C:\Program Files\MongoDB\Server\4.4\data
+C:\Program Files\MongoDB\Server\4.4\log
+
+- can change wherever needed
+mongod --dbpath C:\Program Files\MongoDB\db
+mongod --dbpath C:\Program Files\MongoDB\db --logpath C:\Program Files\MongoDB\logs\logs.log
+
+
+# mongod as a background service
+- on macos / linux
+mongod --fork --logpath /user/mongodb/logs/log.log
+
+- on windows, open cmd in admin mode
+net start MongoDB
+
+- to shutdown background service
+mongo
+> use admin
+> db.shutdownServer()
+
+or
+net stop MongoDB
+
+
+
+
+
+
+
+
 
 
 
