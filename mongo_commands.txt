@@ -1343,6 +1343,27 @@ or
 net stop MongoDB
 
 
+# using a config file
+- also have a mongod.cfg file in bin
+C:\Program Files\MongoDB\Server\4.4\bin
+
+- can use to pass config file when mongod is started
+mongod -f C:\Program Files\MongoDB\Server\4.4\bin\mongod.cfg
+
+
+# mongo client shell
+mongo --help
+
+> help
+> help admin
+> db.help()
+> db.test.help()
+
+
+#####################
+# Create - deep dive
+#####################
+
 
 
 
