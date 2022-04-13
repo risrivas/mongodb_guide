@@ -1363,6 +1363,128 @@ mongo --help
 #####################
 # Create - deep dive
 #####################
+- insertOne()
+db.collectionName.insertOne({field: "value"})
+
+- insertMany()
+db.collectionName.insertMany([{field: "value"}, {field: "value"}])
+
+- insert()    // deprecated
+db.collectionName.insert()
+
+- mongoimport
+mongoimport -d cars -c carsList --drop --jsonArray
+
+- mongo shell:
+------------------------------------
+test> use contactData
+switched to db contactData
+
+contactData> db.persons.insertOne({name: "Max", age: 30, hobbies: ["Sports", "Cooking"]})
+{
+  acknowledged: true,
+  insertedId: ObjectId("625665844b051cf5c0954d0f")
+}
+
+contactData> db.persons.insertOne({name: "Manuel", age: 31, hobbies: ["Cars", "Cooking"]})
+{
+  acknowledged: true,
+  insertedId: ObjectId("625665a94b051cf5c0954d10")
+}
+
+contactData> db.persons.insertMany([{name: "Anna", age: 29, hobbies: ["Cycling", "Yoga"]}])
+{
+  acknowledged: true,
+  insertedIds: { '0': ObjectId("625666344b051cf5c0954d11") }
+}
+
+contactData> db.persons.insertMany([{name: "Maria", age: 31}, {name: "Chris", age: 25}])
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId("625666a04b051cf5c0954d12"),
+    '1': ObjectId("625666a04b051cf5c0954d13")
+  }
+}
+
+contactData> db.persons.insert({name: "Phil", age: 35, hobbies: ["Gym", "Cooking"]})
+DeprecationWarning: Collection.insert() is deprecated. Use insertOne, insertMany, or bulkWrite.
+{
+  acknowledged: true,
+  insertedIds: { '0': ObjectId("625667024b051cf5c0954d14") }
+}
+
+
+
+## Ordered insert
+
+test> use ordered
+switched to db ordered
+
+ordered> db.hobbies.insertMany([{_id: "sports", name: "Sports"}, {_id: "cooking", name: "Cooking"}, {_id: "cars", name: "Cars"}])
+{
+  acknowledged: true,
+  insertedIds: { '0': 'sports', '1': 'cooking', '2': 'cars' }
+}
+
+ordered> db.hobbies.find()
+[
+  { _id: 'sports', name: 'Sports' },
+  { _id: 'cooking', name: 'Cooking' },
+  { _id: 'cars', name: 'Cars' }
+]
+
+- if we insert new documents with same _id, it will fail and give error
+
+ordered> db.hobbies.insertMany([{_id: "yoga", name: "Yoga"}, {_id: "cooking", name: "Cooking"}, {_id: "hiking", name: "Hiking"}])
+Uncaught:
+MongoBulkWriteError: E11000 duplicate key error collection: ordered.hobbies index: _id_ dup key: { _id: "cooking" }
+Result: BulkWriteResult {
+  result: {
+    ok: 1,
+    writeErrors: [
+      WriteError {
+        err: {
+          index: 1,
+          code: 11000,
+          errmsg: 'E11000 duplicate key error collection: ordered.hobbies index: _id_ dup key: { _id: "cooking" }',
+          errInfo: undefined,
+          op: { _id: 'cooking', name: 'Cooking' }
+        }
+      }
+    ],
+    writeConcernErrors: [],
+    insertedIds: [
+      { index: 0, _id: 'yoga' },
+      { index: 1, _id: 'cooking' },
+      { index: 2, _id: 'hiking' }
+    ],
+    nInserted: 1,
+    nUpserted: 0,
+    nMatched: 0,
+    nModified: 0,
+    nRemoved: 0,
+    upserted: []
+  }
+}
+
+- however, if want to still get all the non duplicate entries inserted, add one additional argument to insertMany()
+
+ordered> db.hobbies.insertMany([{_id: "yoga", name: "Yoga"}, {_id: "cooking", name: "Cooking"}, {_id: "hiking", name: "Hiking"}], {ordered: false})
+.. error for duplicates ..
+
+- however, non duplicate got inserted:
+
+ordered> db.hobbies.find()
+[
+  { _id: 'sports', name: 'Sports' },
+  { _id: 'cooking', name: 'Cooking' },
+  { _id: 'cars', name: 'Cars' },
+  { _id: 'yoga', name: 'Yoga' },
+  { _id: 'hiking', name: 'Hiking' }
+]
+
+
 
 
 
