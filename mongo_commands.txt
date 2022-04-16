@@ -1486,6 +1486,158 @@ ordered> db.hobbies.find()
 
 
 
+## write concerns
+- if we dont want to get any acknowledgement from server, we can use write concern as w:0
+
+test> use contactData
+switched to db contactData
+
+contactData> db.persons.insertOne({name: "Chrissy", age: 41}, {writeConcern: {w: 0}})
+{
+  acknowledged: false,
+  insertedId: ObjectId("625a024342eea5f4c9ed20bc")
+}
+
+- default is acknowledged, so no need to set it explicitly:
+contactData> db.persons.insertOne({name: "Alex", age: 36}, {writeConcern: {w: 1}})
+{
+  acknowledged: true,
+  insertedId: ObjectId("625a02bb42eea5f4c9ed20bd")
+}
+
+- journalling at Storage engine is false or undefined by default:
+contactData> db.persons.insertOne({name: "Michael", age: 51}, {writeConcern: {w: 1, j: false}})
+{
+  acknowledged: true,
+  insertedId: ObjectId("625a032742eea5f4c9ed20be")
+}
+
+- however, we can set journalling to true, this will be slower but it will write to storage endine logs
+contactData> db.persons.insertOne({name: "Michaelaa", age: 51}, {writeConcern: {w: 1, j: true}})
+{
+  acknowledged: true,
+  insertedId: ObjectId("625a039042eea5f4c9ed20bf")
+}
+
+- we can also specify timeout - if journalling cannot complete within the timeout
+contactData> db.persons.insertOne({name: "Aliya", age: 22}, {writeConcern: {w: 1, j: true, wtimeout: 200}})
+{
+  acknowledged: true,
+  insertedId: ObjectId("625a03e942eea5f4c9ed20c0")
+}
+
+contactData> db.persons.insertOne({name: "Ranbeer", age: 23}, {writeConcern: {w: 1, j: true, wtimeout: 1}})
+{
+  acknowledged: true,
+  insertedId: ObjectId("625a042142eea5f4c9ed20c1")
+}
+
+
+## What is Atomicity
+- for ex: say operation - insertOne()
+if error - rolled back - nothing is saved
+if success - saved as a whole
+
+- MongoDB CRUD operations are Atomic on the Document level (including Embedded Documents)
+
+
+---------------------
+
+# Assignment 2
+Tasks:
+
+- insert multiple companies (company data of your choice) into a collection - both with insertOne() and insertMany()
+- deliberately insert duplicate ID data and "fix" failing additions with unordered inserts
+- write data for a new company with both journalling being guaranteed and not being guaranteed
+
+
+Solution:
+
+companyData> use assignment2
+switched to db assignment2
+
+assignment2> db.companies.insertOne({_id: "apple", name: "Apple", domain: "Technology"})
+{ acknowledged: true, insertedId: 'apple' }
+
+assignment2> db.companies.insertMany([{_id: "msft", name: "Microsft", domain: "Technology"}, {_id: "wmt", name: "Walmart", domain: "departmental store"}])
+{ acknowledged: true, insertedIds: { '0': 'msft', '1': 'wmt' } }
+
+assignment2> db.companies.find()
+[
+  { _id: 'apple', name: 'Apple', domain: 'Technology' },
+  { _id: 'msft', name: 'Microsft', domain: 'Technology' },
+  { _id: 'wmt', name: 'Walmart', domain: 'departmental store' }
+]
+
+
+assignment2> db.companies.insertMany([{_id: "msft", name: "Microsft dupl", domain: "Technology"}, {_id: "fb", name: "Facebook", domain: "technology"}, { _id: 'googl', name: 'Google', domain: 'Technology' }])
+Uncaught:
+MongoBulkWriteError: E11000 duplicate key error collection: assignment2.companies index: _id_ dup key: { _id: "msft" }
+Result: BulkWriteResult {
+  result: {
+    ok: 1,
+    writeErrors: [
+      WriteError {
+        err: {
+          index: 0,
+          code: 11000,
+          errmsg: 'E11000 duplicate key error collection: assignment2.companies index: _id_ dup key: { _id: "msft" }',
+          errInfo: undefined,
+          op: { _id: 'msft', name: 'Microsft dupl', domain: 'Technology' }
+        }
+      }
+    ],
+    writeConcernErrors: [],
+    insertedIds: [
+      { index: 0, _id: 'msft' },
+      { index: 1, _id: 'fb' },
+      { index: 2, _id: 'googl' }
+    ],
+    nInserted: 0,
+    nUpserted: 0,
+    nMatched: 0,
+    nModified: 0,
+    nRemoved: 0,
+    upserted: []
+  }
+}
+
+assignment2> db.companies.find()
+[
+  { _id: 'apple', name: 'Apple', domain: 'Technology' },
+  { _id: 'msft', name: 'Microsft', domain: 'Technology' },
+  { _id: 'wmt', name: 'Walmart', domain: 'departmental store' }
+]
+
+assignment2> db.companies.insertMany([{_id: "msft", name: "Microsft dupl", domain: "Technology"}, {_id: "fb", name: "Facebook", domain: "technology"}, { _id: 'googl', name: 'Google', domain: 'Technology' }], {ordered: false})
+<errors for msft>
+
+assignment2> db.companies.find()
+[
+  { _id: 'apple', name: 'Apple', domain: 'Technology' },
+  { _id: 'msft', name: 'Microsft', domain: 'Technology' },
+  { _id: 'wmt', name: 'Walmart', domain: 'departmental store' },
+  { _id: 'fb', name: 'Facebook', domain: 'technology' },
+  { _id: 'googl', name: 'Google', domain: 'Technology' }
+]
+
+assignment2> db.companies.insertOne({_id: "nke", name: "Nike", domain: "Shoes"}, {writeConcern: {w: 1, j: true}})
+{ acknowledged: true, insertedId: 'nke' }
+
+assignment2> db.companies.insertOne({_id: "ads", name: "Adidas", domain: "Shoes"}, {writeConcern: {w: 1, j: false}})
+{ acknowledged: true, insertedId: 'ads' }
+
+assignment2> db.companies.find()
+[
+  { _id: 'apple', name: 'Apple', domain: 'Technology' },
+  { _id: 'msft', name: 'Microsft', domain: 'Technology' },
+  { _id: 'wmt', name: 'Walmart', domain: 'departmental store' },
+  { _id: 'fb', name: 'Facebook', domain: 'technology' },
+  { _id: 'googl', name: 'Google', domain: 'Technology' },
+  { _id: 'nke', name: 'Nike', domain: 'Shoes' },
+  { _id: 'ads', name: 'Adidas', domain: 'Shoes' }
+]
+
 
 
 
