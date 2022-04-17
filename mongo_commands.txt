@@ -1639,6 +1639,21 @@ assignment2> db.companies.find()
 ]
 
 
+## mongoimport
+- utility can be used to manually huge set of data from json file
+- example:
+mongoimport tv-shows.json -d movieData -c movies --jsonArray --drop
+
+
+##################################
+# Read operations - A closer look
+##################################
+- methods, filters & operators
+- query selectors (READ)
+- projection operators (READ)
+
+
+
 
 
 
