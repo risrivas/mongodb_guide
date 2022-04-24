@@ -1653,8 +1653,29 @@ mongoimport tv-shows.json -d movieData -c movies --jsonArray --drop
 - projection operators (READ)
 
 
+- syntax:
+db.myCollection.myMethod({})
 
+db.employees.find({age: 30})
+db.employees.find({age: {$gt : 30}})
 
+- mongo shell
+test> use movieData
+switched to db movieData
+
+movieData> show collections
+movies
+
+movieData> db.movies.findOne()
+
+- findOne() will find the first document from collection
+- find() will give first 20 documents with a cursor - type "it" to fetch more
+
+movieData> db.movies.find()
+
+- once put a filter - we can specify which documents we want to fetch
+
+movieData> db.movies.find({name: "The Last Ship"})
 
 
 
