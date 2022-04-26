@@ -1678,6 +1678,14 @@ movieData> db.movies.find()
 movieData> db.movies.find({name: "The Last Ship"})
 
 
+## Comparison operators
+movieData> db.movies.find({runtime: {$ne: 60}})
+movieData> db.movies.find({runtime: {$lt: 40}})
+movieData> db.movies.find({runtime: {$lte: 40}})
+movieData> db.movies.find({runtime: {$gt: 40}})
+movieData> db.movies.find({runtime: {$gte: 40}})
+
+
 
 
 
