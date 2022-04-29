@@ -1686,6 +1686,36 @@ movieData> db.movies.find({runtime: {$gt: 40}})
 movieData> db.movies.find({runtime: {$gte: 40}})
 
 
+## querying embedded field
+- field should be in "" otherwise . will fail as syntax error
+- example:
+movieData> db.movies.find({"rating.average": {$gt: 7}})
+
+- querying a field from array
+- just need to give any 1 field from the array
+- example:
+movieData> db.movies.find({genres: "Drama"})
+
+- $in operator
+- same as "in" in sql
+- $nin is oppposite
+- example:
+movieData> db.movies.find({runtime: {$in: [30, 42]}})
+
+
+## Logical operators
+$and, $not, $nor, $or
+
+- example:
+movieData> db.movies.find({"rating.average": {$lt: 5}}).count()
+2
+
+movieData> db.movies.find({"rating.average": {$gt: 9.3}}).count()
+2
+
+movieData> db.movies.find({$or: [{"rating.average": {$gt: 9.3}}, {"rating.average": {$lt: 5}}]})
+movieData> db.movies.find({$nor: [{"rating.average": {$gt: 9.3}}, {"rating.average": {$lt: 5}}]})
+
 
 
 
