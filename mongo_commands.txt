@@ -1717,7 +1717,169 @@ movieData> db.movies.find({$or: [{"rating.average": {$gt: 9.3}}, {"rating.averag
 movieData> db.movies.find({$nor: [{"rating.average": {$gt: 9.3}}, {"rating.average": {$lt: 5}}]})
 
 
+# operator: $and
+- mongoDB filters by default as $and
+- thus the below 2 commands are same
+movieData> db.movies.find({$and: [{"rating.average": {$gt: 9}}, {genres: "Drama"}]})
+movieData> db.movies.find({"rating.average": {$gt: 9}, genres: "Drama"})
+
+- however, $and could be used for the same field in multiple conditions
+movieData> db.movies.find({$and: [{genres: "Drama"}, {genres: "Horror"}]})
+
+- if we use without $and
+movieData> db.movies.find({genres: "Drama", genres: "Horror"})
+
+then second condition will override the first and it will become:
+movieData> db.movies.find({genres: "Horror"})
 
 
+# operator: $not
+movieData> db.movies.find({runtime: {$not: {$eq: 60}}})
+
+- however same can be used with easier syntax of $ne
+movieData> db.movies.find({runtime: {$ne: 60}})
+
+
+## Element operators
+$exists, $type
+
+movieData> use user
+switched to db user
+
+user> db.users.insertMany([{name: "Max", hobbies: [{title: "Sports", frequency: 3}, {title: "Cooking", frequency: 6}], phone: 01312424}, {name: "Manuel", hobbies: [{title: "Cooking", frequency: 5}, {title: "Cars", frequency: 2}], phone: "345135556", age:30}])
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId("627061ad531874b77b45bff0"),
+    '1': ObjectId("627061ad531874b77b45bff1")
+  }
+}
+
+- note that phone for Max is number while for Manuel it is string
+- also Manuel has got extra field of age
+
+- find all the documents where one particular field exists
+user> db.users.find({age: {$exists: true}})
+[
+  {
+    _id: ObjectId("627061ad531874b77b45bff1"),
+    name: 'Manuel',
+    hobbies: [
+      { title: 'Cooking', frequency: 5 },
+      { title: 'Cars', frequency: 2 }
+    ],
+    phone: '345135556',
+    age: 30
+  }
+]
+
+user> db.users.find({age: {$exists: true, $gt: 30}})
+
+user> db.users.find({age: {$exists: true, $gte: 30}})
+[
+  {
+    _id: ObjectId("627061ad531874b77b45bff1"),
+    name: 'Manuel',
+    hobbies: [
+      { title: 'Cooking', frequency: 5 },
+      { title: 'Cars', frequency: 2 }
+    ],
+    phone: '345135556',
+    age: 30
+  }
+]
+
+- add 1 more user with phone as string and age as null
+user> db.users.insertOne({name: "Anna", hobbies: [{title: "Sports", frequency: 2}, {title: "Yoga", frequency: 3}], phone: "3265784365", age: null})
+{
+  acknowledged: true,
+  insertedId: ObjectId("62706342531874b77b45bff2")
+}
+
+- although age is null for Anna, still it will come as exists is true
+user> db.users.find({age: {$exists: true}})
+[
+  {
+    _id: ObjectId("627061ad531874b77b45bff1"),
+    name: 'Manuel',
+    hobbies: [
+      { title: 'Cooking', frequency: 5 },
+      { title: 'Cars', frequency: 2 }
+    ],
+    phone: '345135556',
+    age: 30
+  },
+  {
+    _id: ObjectId("62706342531874b77b45bff2"),
+    name: 'Anna',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Yoga', frequency: 3 }
+    ],
+    phone: '3265784365',
+    age: null
+  }
+]
+
+
+- one way to check if its null
+user> db.users.find({age: {$exists: true, $ne: null}})
+[
+  {
+    _id: ObjectId("627061ad531874b77b45bff1"),
+    name: 'Manuel',
+    hobbies: [
+      { title: 'Cooking', frequency: 5 },
+      { title: 'Cars', frequency: 2 }
+    ],
+    phone: '345135556',
+    age: 30
+  }
+]
+
+
+# operator: $type
+- to find a field with a partcular data type
+user> db.users.find({phone: {$type: "number"}})
+[
+  {
+    _id: ObjectId("627061ad531874b77b45bff0"),
+    name: 'Max',
+    hobbies: [
+      { title: 'Sports', frequency: 3 },
+      { title: 'Cooking', frequency: 6 }
+    ],
+    phone: 365844
+  }
+]
+
+- number is a generic type for integer / double
+
+user> db.users.find({phone: {$type: "string"}})
+[
+  {
+    _id: ObjectId("627061ad531874b77b45bff1"),
+    name: 'Manuel',
+    hobbies: [
+      { title: 'Cooking', frequency: 5 },
+      { title: 'Cars', frequency: 2 }
+    ],
+    phone: '345135556',
+    age: 30
+  },
+  {
+    _id: ObjectId("62706342531874b77b45bff2"),
+    name: 'Anna',
+    hobbies: [
+      { title: 'Sports', frequency: 2 },
+      { title: 'Yoga', frequency: 3 }
+    ],
+    phone: '3265784365',
+    age: null
+  }
+]
+
+- can also give array
+user> db.users.find({phone: {$type: ["string", "number"]}})
 
 
